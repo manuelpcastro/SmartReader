@@ -1,5 +1,7 @@
 # SmartReader
 
+**Pruébalo:** https://manuelpcastro.github.io/SmartReader/
+
 Escucha documentos en español con una voz lo más natural posible. Sube un archivo, abre un enlace o pega un texto, y SmartReader lo lee en voz alta con controles de reproducción completos.
 
 ## Funciones
@@ -38,7 +40,7 @@ npm test           # pruebas del procesado de texto
 npm run build      # comprobación de tipos + compilación en dist/
 ```
 
-Es una aplicación estática (Vite + TypeScript, sin backend): `dist/` puede publicarse en cualquier hosting estático (GitHub Pages, Netlify…).
+Es una aplicación estática (Vite + TypeScript, sin backend). Cada push a `main` la compila y la publica en GitHub Pages (`.github/workflows/pages.yml`).
 
 ### Estructura
 
