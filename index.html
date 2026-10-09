@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>SmartReader</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>" />
+    <script type="module" crossorigin src="./assets/index-Bybl9dqB.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-GGdH_hn7.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <button class="brand" id="home" type="button" title="Cargar otro documento">
+        <span aria-hidden="true">🎧</span> SmartReader
+      </button>
+      <span class="doc-title" id="doc-title"></span>
+      <button class="icon-btn" id="open-settings" type="button" aria-label="Ajustes de voz" title="Ajustes de voz">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7.4-2.5.1-1-.1-1 2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9c-.6.3-1.2.6-1.7 1l-2.5-1-2 3.5L6.6 11l-.1 1 .1 1-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.2-1.6Z"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <!-- Carga del documento -->
+      <section id="loader" class="loader">
+        <h1>Escucha cualquier documento</h1>
+        <p class="lead">Sube un archivo, enlaza un documento o pega un texto en español y escúchalo con una voz natural.</p>
+
+        <div class="tabs" role="tablist">
+          <button role="tab" class="tab" aria-selected="true" data-tab="file" type="button">Archivo</button>
+          <button role="tab" class="tab" aria-selected="false" data-tab="url" type="button">Enlace</button>
+          <button role="tab" class="tab" aria-selected="false" data-tab="paste" type="button">Pegar texto</button>
+        </div>
+
+        <div class="tab-panel" data-panel="file">
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="file-input" hidden />
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2.5L17.5 8H14V4.5ZM12 11l4 4h-3v4h-2v-4H8l4-4Z"/></svg>
+            <strong>Arrastra un documento aquí</strong>
+            <span>o haz clic para elegirlo · PDF, Word (.docx), TXT, Markdown, HTML</span>
+          </label>
+        </div>
+
+        <form class="tab-panel" data-panel="url" id="url-form" hidden>
+          <label for="url-input">Enlace al documento</label>
+          <div class="row">
+            <input type="url" id="url-input" placeholder="https://…/documento.pdf" required />
+            <button class="btn primary" type="submit">Abrir</button>
+          </div>
+          <p class="hint">Admite PDF, páginas web, Google Docs públicos y enlaces de Dropbox. Algunos sitios no permiten la descarga directa desde el navegador; en ese caso, descarga el archivo y súbelo.</p>
+        </form>
+
+        <form class="tab-panel" data-panel="paste" id="paste-form" hidden>
+          <label for="paste-input">Texto</label>
+          <textarea id="paste-input" rows="10" placeholder="Pega aquí el texto que quieres escuchar…"></textarea>
+          <button class="btn primary" type="submit">Leer este texto</button>
+        </form>
+
+        <p class="status" id="load-status" role="status" aria-live="polite"></p>
+
+        <div class="resume-card" id="resume-card" hidden>
+          <div>
+            <span class="eyebrow">Continuar escuchando</span>
+            <strong id="resume-title"></strong>
+            <span id="resume-progress"></span>
+          </div>
+          <button class="btn primary" id="resume-btn" type="button">Continuar</button>
+        </div>
+      </section>
+
+      <!-- Lector -->
+      <section id="reader" class="reader" hidden>
+        <article id="text" class="text" lang="es"></article>
+      </section>
+    </main>
+
+    <!-- Barra del reproductor -->
+    <footer class="player" id="player" hidden>
+      <div class="progress-row">
+        <input type="range" id="progress" min="0" max="0" value="0" step="1" aria-label="Posición en el documento" />
+        <div class="progress-info">
+          <span id="position-label">Frase 1 de 1</span>
+          <span id="time-label"></span>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="ctl" id="prev-para" type="button" title="Párrafo anterior (Mayús + ←)" aria-label="Párrafo anterior">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12l8.5 6V6z"/></svg>
+        </button>
+        <button class="ctl" id="prev" type="button" title="Frase anterior (←)" aria-label="Frase anterior">
+          <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6Zm.5-6 8.5 6V6l-8.5 6Z"/></svg>
+        </button>
+        <button class="ctl play" id="play" type="button" title="Reproducir / pausar (espacio)" aria-label="Reproducir">
+          <svg viewBox="0 0 24 24" class="i-play"><path d="M8 5v14l11-7z"/></svg>
+          <svg viewBox="0 0 24 24" class="i-pause"><path d="M6 19h4V5H6v14Zm8-14v14h4V5h-4Z"/></svg>
+        </button>
+        <button class="ctl" id="next" type="button" title="Frase siguiente (→)" aria-label="Frase siguiente">
+          <svg viewBox="0 0 24 24"><path d="m4 18 8.5-6L4 6v12Zm9-12v12l8.5-6L13 6Z"/></svg>
+        </button>
+        <button class="ctl" id="next-para" type="button" title="Párrafo siguiente (Mayús + →)" aria-label="Párrafo siguiente">
+          <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <button class="ctl" id="stop" type="button" title="Detener (Esc)" aria-label="Detener">
+          <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+        </button>
+      </div>
+      <div class="extras">
+        <label class="rate">
+          <span>Velocidad</span>
+          <select id="rate">
+            <option value="0.75">0,75×</option>
+            <option value="0.9">0,9×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.1">1,1×</option>
+            <option value="1.25">1,25×</option>
+            <option value="1.5">1,5×</option>
+            <option value="1.75">1,75×</option>
+            <option value="2">2×</option>
+          </select>
+        </label>
+        <span class="engine-badge" id="engine-badge"></span>
+      </div>
+      <p class="player-error" id="player-error" role="alert" hidden></p>
+    </footer>
+
+    <!-- Ajustes de voz -->
+    <dialog id="settings" class="settings">
+      <form method="dialog">
+        <header>
+          <h2>Ajustes de voz</h2>
+          <button class="icon-btn" value="close" aria-label="Cerrar">✕</button>
+        </header>
+
+        <fieldset>
+          <legend>Motor de voz</legend>
+          <label class="choice">
+            <input type="radio" name="engine" value="browser" />
+            <span><strong>Voz del navegador</strong> · gratuita, sin conexión con terceros. La calidad depende del sistema: en Edge y Chrome hay voces neuronales muy naturales.</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="engine" value="openai" />
+            <span><strong>OpenAI</strong> · voz neuronal expresiva con instrucciones de acento y entonación. Requiere clave de API.</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="engine" value="elevenlabs" />
+            <span><strong>ElevenLabs</strong> · la voz más humana, con continuidad de entonación entre frases. Requiere clave de API.</span>
+          </label>
+        </fieldset>
+
+        <label class="field">
+          <span>Acento</span>
+          <select id="accent">
+            <option value="es-ES">España</option>
+            <option value="es-MX">México</option>
+            <option value="es-US">Latinoamérica (neutro)</option>
+            <option value="es-AR">Argentina</option>
+            <option value="es-CO">Colombia</option>
+          </select>
+        </label>
+
+        <div data-engine="browser">
+          <label class="field">
+            <span>Voz</span>
+            <select id="browser-voice"></select>
+          </label>
+          <p class="hint" id="browser-voice-hint"></p>
+          <label class="field">
+            <span>Tono</span>
+            <input type="range" id="pitch" min="0.8" max="1.2" step="0.05" value="1" />
+          </label>
+        </div>
+
+        <div data-engine="openai" hidden>
+          <label class="field">
+            <span>Clave de API de OpenAI</span>
+            <input type="password" id="openai-key" autocomplete="off" placeholder="sk-…" />
+          </label>
+          <label class="field">
+            <span>Voz</span>
+            <select id="openai-voice"></select>
+          </label>
+          <label class="field">
+            <span>Estilo de lectura (opcional)</span>
+            <input type="text" id="openai-style" placeholder="p. ej.: tono cálido y sereno, como un cuento" />
+          </label>
+        </div>
+
+        <div data-engine="elevenlabs" hidden>
+          <label class="field">
+            <span>Clave de API de ElevenLabs</span>
+            <input type="password" id="eleven-key" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Voz</span>
+            <div class="row">
+              <select id="eleven-voice"></select>
+              <button class="btn" type="button" id="eleven-load">Cargar voces</button>
+            </div>
+          </label>
+        </div>
+
+        <p class="hint privacy">Las claves se guardan solo en este navegador y se envían directamente al servicio elegido. Con los motores en la nube, el texto del documento se envía a ese servicio para generar el audio.</p>
+
+        <div class="test-row">
+          <button class="btn" type="button" id="test-voice">Probar voz</button>
+          <label class="toggle">
+            <input type="checkbox" id="show-spoken" />
+            <span>Mostrar el texto tal como se lee</span>
+          </label>
+        </div>
+      </form>
+    </dialog>
+
+  </body>
+</html>
